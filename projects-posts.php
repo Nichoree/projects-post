@@ -12,6 +12,13 @@
 
 /** Creates a custom post type called projects */
 
+function projects_posts_scripts() {
+    wp_enqueue_style( 'w3', get_template_directory_uri() . '/css/w3.css', false, '' , 'all' );
+    wp_enqueue_style( 'creativejoy', get_template_directory_uri() . '/css/projects-posts.css', false, '' , 'all' );
+    }
+add_action( 'wp_enqueue_scripts', 'projects_posts_scripts' );
+
+
 //add custom post type projects
   function create_posttype() {
     register_post_type( 'projects',
@@ -62,13 +69,13 @@
 add_action( 'init', 'create_posttype' );
 
 //query for projects 
-add_action( 'pre_get_posts', 'add_my_post_types_to_query' );
 function add_my_post_types_to_query( $query ) {
     if ( is_home() && $query->is_main_query() )
     $query->set( 'post_type', array( 'post', 'projects' ) );
     return $query;
 }
 
+add_action( 'pre_get_posts', 'add_my_post_types_to_query' );
 
 
  ?>
