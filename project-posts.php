@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       Custom Project Posts
+ * Plugin Name:       Project Posts
  * Plugin URI:        https://github.com/Nichoree/wordpress-posts-plugin
  * Description:       A WordPress plugin that allows users to create a custom post type called projects.
  * Version:           0.1
@@ -11,12 +11,6 @@
 
 
 /** Creates a custom post type called projects */
-
-function projects_posts_scripts() {
-    wp_enqueue_style( 'w3', get_template_directory_uri() . '/css/w3.css', false, '' , 'all' );
-    wp_enqueue_style( 'creativejoy', get_template_directory_uri() . '/css/projects-posts.css', false, '' , 'all' );
-    }
-add_action( 'wp_enqueue_scripts', 'projects_posts_scripts' );
 
 
 //add custom post type projects
@@ -77,5 +71,61 @@ function add_my_post_types_to_query( $query ) {
 
 add_action( 'pre_get_posts', 'add_my_post_types_to_query' );
 
+//List projects posts
 
+/** Adds shortcode to list project posts based on different categories 
+ * 
+ * HOW TO USE SHORTCODE
+ * [projects-list post-type="projects" category=0 number-of-posts=3]
+ *      "posts" in post-type can be replaced by custom post types
+ * 
+*/
+
+function projects_list_styles() {
+    wp_enqueue_style( 'w3', plugin_dir_url( __FILE__ ) . '/css/w3.css', false, '' , 'all' );
+    wp_enqueue_style( 'projects-list', plugin_dir_url( __FILE__ ).'/css/posts-list.css', false, '' , 'all' );
+    };
+add_action( 'wp_enqueue_scripts', 'projects_list_styles' );
+
+function posts_list_shortcode($atts)
+    {
+        ob_start();
+        $defaults = array(
+            'post-type' => 'projects',
+            'category' => 0,
+            'number-of-posts' => -1
+        );
+        $project_atts = shortcode_atts($defaults, $atts, 'projects-list');
+        $projects_args = array(
+            'numberposts' => $project_atts['number-of-posts'],
+            'post_type' => $project_atts['post-type'],
+            'category_name' => $project_atts['category'],
+        );
+
+        $projects = get_posts($projects_args);
+
+        if ($projects) { ?>
+            <div class="w3-row-padding post-row">
+            <?php 
+            foreach($projects as $project) { ?>
+            
+                <div class="w3-col l4 m6 s12">
+                <a href=<?php echo get_permalink($project->ID); ?>>
+                <div class="posts-list-image">
+                    <?php echo get_the_post_thumbnail($project->ID); ?>
+            </div>
+                <h4><?php echo esc_html( get_the_title($project->ID) ); ?></h4>
+            </a>
+            </div> 
+            <?php } ?>
+            </div>
+            <?php
+        } else { echo "<p>No posts found </p>"; }
+            
+        // always return
+        return ob_get_clean();
+    }
+
+// Register shortcode
+add_shortcode('projects-list', 'projects_list_shortcode');
  ?>
